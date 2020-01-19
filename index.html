@@ -77,18 +77,19 @@
     const rewardId = params.get( "reward" ) || "";
     const isTTSEnabled = params.get( "tts" ) || false;
     const ttsVoice = params.get( "voice" ) || "Ivy";
+    const folder = params.get( "folder" ) || "yoda";
     let messageId = "";
-    let yodaImages = [ "web/yodaAdmire.jpg", "web/yodaAww.jpg", "web/yodaPeekaboo.jpg", "web/yodaSleepy.jpg", "web/yodaStern.jpg", "web/yodaThink.jpg", "web/yodaWant.jpg", "web/yodaWise.jpg" ];
-    let yodaMemes = [ "My beer you hold.", "I pooped.", "Hello security camera.", "Me after I give my mom my Christmas list", "My lazy butt reaching for the remote after 32 episodes of The Office", "Me staring at my bedroom ceiling at 3am listening to depressing sad emo music." ];
     let refreshTimer = null;
-    $(document).ready(() => {
+    $(document).ready(async () => {
+      let yodaImages = await loadInfo(folder, "images.txt");
+      let yodaMemes =  await loadInfo(folder, "memes.txt");
       if( !params.get( "overlay" ) ) {
         $("#inputskaputs").css( "visibility", "visible" );
         $("#motivation").css( "visibility", "visible" );
       }
       let yodaImage = yodaImages[ Math.floor( Math.random() * yodaImages.length ) ];
       let yodaQuote = yodaMemes[ Math.floor( Math.random() * yodaMemes.length ) ];
-      $("#motivation-img").attr( "src", yodaImage );
+      $("#motivation-img").attr( "src", "web/" + folder + "/" + yodaImage);
       $("#motivation-quote").text( yodaQuote );
       $("#quote-text").on('input propertychange paste', () => {
         $("#motivation-quote").text($("#quote-text").val());
@@ -101,6 +102,12 @@
         $("#motivation-canvas").html(canvas);
       });
   });
+
+  async function loadInfo(folder, type) {
+    const res = await fetch("web/" + folder + '/' + type);
+    const text = await res.text();
+    return text.split("\n")
+  }
 
   async function showMeme( message ) {
      $("#motivation-quote").text( message );
